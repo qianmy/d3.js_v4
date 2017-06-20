@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图</title>
+    <style>
+        .container1,.container2{
+            width:700px;
+            height:350px;
+            float: left;
+            border:1px solid gray;
+            margin: 5px;
+            padding:10px;
+        }
+        .container1,.container2 text{
+            font-size: 12px;
+        }
+        .axis path,.axis line{
+            fill:none;
+            /*stroke: white;*/
+            display: none;
+            shape-rendering: crispEdges;
+        }
+        .container1{
+            position:relative;
+        }
+        .container1 h2{
+            position:absolute;
+            top:0px;
+        }
+        .grayline{
+            width:650px;
+            height:0px;
+            position:absolute;
+            left:30px;
+            bottom:99px;
+            border-bottom:1px solid gray;
+        }
+        .MyRect{
+            fill:steelblue;
+        }
+        .MyText{
+             fill:gray;
+             /*font-size: 12px;*/
+             text-anchor: middle;
+         }
+        .MyText2{
+            fill:red;
+            /*font-size: 12px;*/
+            text-anchor: middle;
+        }
+        .legend1{
+            width:30px;
+            height:10px;
+            fill:steelblue;
+            position:absolute;
+        }
+        .legend2{
+            width:35px;
+            height:8px;
+            fill:red;
+        }
+
+        /*.bottomLine{*/
+            /*width:630px;*/
+            /*height:1px;*/
+            /*fill:gray;*/
+        /*}*/
+         .container2 .title{
+            font-size: 18px;
+        }
+
+    </style>
+    <script type="text/javascript" src="d3/d3.js"></script>
+</head>
+<body>
+    <div class="container1">
+        <h2>一级部门人员参与与发现问题数Top10</h2>
+        <div class="grayline"></div>
+    </div>
+    <div class="container2">
+
+    </div>
+</body>
+    <script>
+
+        var dataset = {
+            "mermber":[58,48,48,46,40,40,28,28,28,28],
+            "promblem":[10,1,20,0,57,2,10,0,10,0],
+            "branch":["部门1","部门2","部门3","部门4","部门5","部门6","部门7","部门8","部门9","部门10"]
+        };
+
+        var width = 700;
+        var height = 300;
+        var padding = {top:50,right:30,bottom:40,left:20};
+        //创建画布
+        var svg1 = d3.select(".container1")
+                .append("svg")
+                .attr("width",width)
+                .attr("height",height);
+
+
+//        var svg3 = d3.select(".container1")
+////                .selectAll("svg")
+//                .append("svg")
+//                .attr("width",width)
+//                .attr("height",height)
+//                .attr("position","absolute")
+//                .attr("transform","translate(0," + (-height-4) + ")");
+
+
+        //创建比例尺
+        //柱形图
+
+//        var xScale1 = d3.scaleBand()
+//                .domain(dataset.branch)
+//                .range([0,width-padding.left-padding.right])
+        var xScale1 = d3.scaleBand()
+                        .domain(d3.range(dataset.mermber.length))   //返回[0, 1, 2, 3, 4, 5, 6, 7]
+                        .range([0, width - padding.left - padding.right]);
+        var yScale1 = d3.scaleLinear()
+                .domain([0,d3.max(dataset.mermber)])
+                .range([height-padding.top-padding.bottom,0]);
+
+//        var xScaleBottom = d3.scaleLinear()
+//                .domain([0,dataset.branch.length-1])
+//                .range([0,width-padding.left-padding.right])
+        var yScaleRight = d3.scaleLinear()
+//                .domain(d3.extent(dataset.promblem,function(d){     //d3.extent可以得到参数数组中的最大值和最小值，并以数组的形式返回。
+//                    return d;
+//                }))
+                .domain([0,d3.max(dataset.promblem)])
+                .range([height-padding.top-padding.bottom,0]);
+
+        //创建坐标轴
+        var xAxis1 = d3.axisBottom()
+                .scale(xScale1);
+
+        var yAxis1 = d3.axisLeft()
+                .scale(yScale1);
+
+        var yAxisRight = d3.axisRight()
+                .scale(yScaleRight);
+
+        //创建坐标轴元素
+        //y轴
+        svg1.append("g")
+                .attr("class","axis")
+                .attr("transform","translate(" + padding.left + "," + padding.top + ")")
+                .call(yAxis1);
+        //x轴
+        svg1.append("g")
+                .attr("class","axis")
+                .attr("transform","translate(" + padding.left + "," + (height - padding.bottom) + ")")
+                .call(xAxis1)
+                .selectAll("text")  //通过编号获取对应的横轴标签
+                .text(function(d){return dataset.branch[d];})
+                .attr("transform","rotate(-30 0,40)");
+        //折线y轴
+        svg1.append("g")
+                .attr("class","axis")
+                .attr("transform","translate("+(width - padding.right ) + "," + padding.top + ")")
+                .call(yAxisRight);
+
+        //添加矩形元素
+//        var xScale = d3.scaleBand()
+//                .domain(d3.range(dataset.mermber.length))   //返回[0, 1, 2, 3, 4, 5, 6, 7]
+//                .range([0, width - padding.left - padding.right]);
+        var rectPadding = 30;
+        var rects = svg1.selectAll(".MyRect")
+                .data(dataset.mermber)
+                .enter()
+                .append("rect")
+                .attr("class","MyRect")
+                .attr("x",function(d,i){
+                    return xScale1(i) + rectPadding;
+                })
+                .attr("y",function(d){
+                    return yScale1(d) + padding.top;
+                })
+                .attr("width",xScale1.bandwidth()- rectPadding)
+                .attr("height",function(d){
+                    return height - padding.top - padding.bottom - yScale1(d);
+                });
+
+        var texts = svg1.selectAll(".MyText")
+                .data(dataset.mermber)
+                .enter()
+                .append("text")
+                .attr("class","MyText")
+                .attr("x",function(d,i){
+                    return xScale1(i) + rectPadding;
+                })
+                .attr("y",function(d){
+                    return yScale1(d) + padding.top;
+                })
+                .attr("dx",function(){
+                    return (xScale1.bandwidth()- rectPadding) / 2;
+                })
+                .attr("dy",function(){
+                    return -10;
+                })
+                .text(function(d){
+                    return d;
+                });
+
+        //折线
+        //创建一个直线生成器
+        var line1 = d3.line()
+                .x(function(d,i){return xScale1(i);})
+                .y(function(d){return yScaleRight(d);});
+
+
+        //添加path元素，并通过line()计算出值来赋值
+        var path1 = svg1.append("path")
+                .attr("class","line")
+                .attr("d",line1(dataset.promblem))
+                .attr("transform","translate(" + padding.left*2.5 + "," +padding.top+")")
+                .attr("fill","none")
+                .attr("stroke","red")
+                .attr("stroke-width","2");
+        //添加折线图文字
+        var text2 = svg1.selectAll(".MyText2")
+               .data(dataset.promblem)
+                .enter()
+                .append("text")
+                .attr("class","MyText2")
+                .attr("transform","translate(" + padding.left + "," + padding.bottom + ")")
+                .attr("x",function(d,i){
+                   return xScale1(i) + rectPadding;
+               })
+                .attr("y",function(d){
+                    return yScaleRight(d);
+                })
+                .text(function(d){
+                    return d;
+                });
+
+        //添加图例
+        svg1.append("rect")
+                .attr("class","legend1")
+                .attr("transform","translate(" + (width-padding.left*15) + "," + (height - 10) + ")");
+        svg1.append("text")
+                .attr("transform","translate(" + (width-padding.left*13) + "," + (height-1) + ")")
+                .text("部门人数");
+        svg1.append("rect")
+                .attr("class","legend2")
+                .attr("transform","translate(" + (width-padding.left*9) + "," + (height - 10) + ")");
+        svg1.append("text")
+                .attr("transform","translate(" + (width-padding.left*7) + "," + (height-1) + ")")
+                .text("发现问题数");
+
+
+//第二幅折线图
+        var data = {
+            "branch":["部门1","部门2","部门3","部门4","部门5","部门6","部门7","部门8","部门9","部门10"],
+            "use":[1154.00,634.41,491.13,390.17,382.61,198.00,176.75,142.06,96.47,92.00]
+        };
+        var svg2 = d3.select(".container2")
+                        .append("svg")
+                        .attr("width",width)
+                        .attr("height",height);
+
+        //创建比例尺
+        var xScale2 = d3.scaleLinear()
+                .domain([0,dataset.branch.length-1])
+                .range([0,width-padding.left-padding.right*2]);  //.range([60,400]);//这个range相当于横轴的左右平移
+        var yScale2 = d3.scaleLinear()
+                .domain([0,d3.max(data.use)])
+                .range([height-padding.top-padding.bottom,0]);
+
+        //创建坐标轴
+        var xAxis2 = d3.axisBottom()
+                .scale(xScale2);
+
+        var yAxis2 = d3.axisLeft()
+                .scale(yScale2);
+
+        //创建坐标轴元素
+        svg2.append("g")
+                .attr("class","axis")
+                .attr("transform","translate(" + (padding.left*3.5) + "," + (height - padding.bottom) + ")")
+                .call(xAxis2)
+                .selectAll("text")
+                .text(function(d){
+                    return data.branch[d];
+                })
+                .attr("transform","rotate(-30 0,40)");
+
+        svg2.append("g")
+                .attr("class","axis")
+                .attr("transform","translate(" + (padding.left+20) + "," + padding.top + ")")
+                .call(yAxis2);
+
+        //创建直线生成器
+        var line2 = d3.line()
+                .x(function(d,i){
+                    return xScale2(i);
+                })
+                .y(function(d){
+                    return yScale2(d);
+                });
+
+        //创建折线元素
+        var path2 = svg2.append("path")
+                .attr("class","line")
+                .attr("d",line2(data.use))
+                .attr("transform","translate(" + padding.left*3 + "," +padding.top+")")
+                .attr("fill","none")
+                .attr("stroke","red")
+                .attr("stroke-width","2");
+
+        //创建文字元素
+        var texts2 = svg2.selectAll(".MyText")
+                .data(data.use)
+                .enter()
+                .append("text")
+                .text(function(d){
+                    return d;
+                })
+                .attr("x",function(d,i){
+                    return xScale2(i);
+                })
+                .attr("y",function(d){
+                    return yScale2(d);
+                })
+                .attr("transform","translate(" + padding.left*3 + ","+ padding.top + ")");
+
+        //x坐标轴的横线
+//        var bottomLine = svg2.append("rect")
+        //                .attr("class","bottomLine")
+        //                .attr("transform","translate(" + padding.left*3 + "," + (height-padding.bottom) + ")")
+        var bottomLine = svg2.append("line")
+                .attr("x1",padding.left*3)
+                .attr("y1",height-padding.bottom)
+                .attr("x2",width-padding.left)
+                .attr("y2",height-padding.bottom)
+                .attr("stroke","gray")
+                .attr("stroke-width",1);
+
+        //标题
+        var title = svg2.append("text")
+                .text("Top10人均使用度")
+                .attr("x",(width-padding.left-padding.right)/2)
+                .attr("y",padding.top/2)
+                .attr("class","title");
+
+
+
+
+    </script>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>圆上旋转的线</title>
+</head>
+<body>
+    <svg width="400" height="400">
+        <g transform="translate(200,200)">
+            <circle r="100" fill="rgba(200,200,200,0.2)" stroke="#ccc" stroke-width="1"></circle>
+            <g id="g">
+                <line x2="100" y2="0" stroke="#333" stroke-width="1"></line>
+                <text x="100">123</text>
+            </g>
+        </g>
+    </svg>
+
+
+</body>
+    <script type="text/javascript" src="d3/d3.js"></script>
+    <script>
+        var g = d3.select("#g"),
+                i = 0;
+
+        setInterval(function(){
+            g.attr("transform",function(){
+                return "rotate(" + (i * 180 / Math.PI -90) + ")"    //角度 = 弧度 * 180 / Math.PI   弧度 = 角度 * Math.PI / 180
+            })
+
+            g.select("text")
+//                    .attr("text-anchor",function(){
+//                        return i < Math.PI ? "start" : "end";   //π在角度里为180°
+//                    })
+//                    .attr('dx', function () {
+//                        return i < Math.PI ? 0 : 35;
+//                    })
+                    .attr("x",function(){
+                        return i < Math.PI ? 100 : 108;
+                    })
+                    .attr("rotate",function(){
+                        return i < Math.PI ? 0 : -180;
+                    })
+            i < Math.PI * 2 ? (i = i + 0.2) : i = 0;
+        },400)
+
+    </script>
+</html>

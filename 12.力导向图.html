@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>力导向图</title>
+</head>
+<style>
+    .link {
+        stroke: #000;
+        stroke-width: 1.5px;
+    }
+
+    .node {
+        cursor: move;
+        stroke: #000;
+        stroke-width: 1.5px;
+    }
+</style>
+<body>
+    <script src="d3/d3.js"></script>
+    <script>
+        var graph = {
+            "nodes": [{"name": "桂林"}, {"name": "广州"},
+                {"name": "厦门"}, {"name": "杭州"},
+                {"name": "上海"}, {"name": "青岛"},
+                {"name": "天津"}],
+            "edges": [{"source": 0, "target": 1}, {"source": 0, "target": 2},
+                {"source": 0, "target": 3}, {"source": 1, "target": 4},
+                {"source": 1, "target": 5}, {"source": 1, "target": 6}]
+
+        }
+        var width = 400;
+        var height = 400;
+
+        var svg = d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+        //布局（数据转换）
+//        var simulation = d3.forceSimulation()
+//                .force("charge",d3.forceManyBody()) //相互之间的作用力
+//                .force("center",d3.forceCenter(width / 2,height / 2))
+//                .on("tick",tick)    //每进行到一个时刻，都要调用它
+//
+//        simulation.nodes(graph.nodes)
+//                .force("link",d3.forceLink(graph.edges).distance(200))  //连线间距离
+
+        var simulation = d3.forceSimulation(graph.nodes)    //节点数据
+                .force("link",d3.forceLink(graph.edges).distance(200))  //  连线数据
+                .force("charge",d3.forceManyBody()) //charge 是定义结点间是吸引（值为正）还是互斥（值为负），值越大力越强。
+                .force("center",d3.forceCenter(width / 2,height / 2))
+                .on("tick",tick)
+
+        //绘制node和edge
+        var color = d3.scaleOrdinal(d3.schemeCategory20);
+        //加载连线
+        console.log(graph.edges)
+        var link = svg.selectAll(".link")
+                .data(graph.edges)
+                .enter()
+                .append("line")
+                .attr("class","link");
+        //绘制圆点
+        console.log(graph.nodes)
+        var node = svg.selectAll(".node")
+                .data(graph.nodes)
+                .enter()
+                .append("circle")
+                .attr("class","node")
+                .attr("r",12)
+                .attr("fill",function (d,i) {
+                    return color(i);
+                })
+                .call(d3.drag()
+                        .on("start", dragstart) //自定义函数
+                        .on("drag", dragged)
+                        .on("end",dragended)
+                )
+//
+//        var link = svg.append("g")
+//                .attr("class","link")
+//                .selectAll("line")
+//                .data(graph.edges)
+//                .enter().append("line")
+//
+//
+//        var node = svg.append("g")
+//                .attr("class","node")
+//                .selectAll("circle")
+//                .data(graph.nodes)
+//                .enter().append("circle")
+//                .attr("r",5)
+//                .attr("fill",function(d,i){return color(i);})
+//                .call(d3.drag()
+//                        .on("start",dragstart)
+//                        .on("drag",dragged)
+//                        .on("end",dragended));
+
+        //绘制文字
+//        var texts = node.append("title")
+//                .text(function(d){
+//                    return d.name;
+//                })
+        var texts = svg.selectAll("text")
+                .data(graph.nodes)
+                .enter()
+                .append("text")
+                .style("fill", "black")
+                .attr("x", function(d){ return d.x; })
+                .attr("y", function(d){ return d.y; })
+                .text(function(d){
+                    return d.name;
+                });
+
+
+        function dragstart(d){
+            if(!d3.event.active){
+                simulation.alphaTarget(0.3).restart();  //restart是重新恢复模拟
+            }
+            d.fx = d.x; //d.x是当前位置，d.fx是固定位置
+            d.fy = d.y;
+        }
+        function dragged(d){
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+        }
+        function dragended(d) {
+            if (!d3.event.active) simulation.alphaTarget(0);    //alpha是动画的冷却系数，运动过程中会不断减小，直到小于0.005为止，此时动画会停止。
+            d.fx = null;    //解除dragged中固定的坐标
+            d.fy = null;
+        }
+
+        function tick() {
+            link.attr("x1", function(d) { return d.source.x; })
+                    .attr("y1", function(d) { return d.source.y; })
+                    .attr("x2", function(d) { return d.target.x; })
+                    .attr("y2", function(d) { return d.target.y; });
+
+            node.attr("cx", function(d) { d.fx=d.x;return d.x; })
+                    .attr("cy", function(d) { d.fy=d.y;return d.y; });
+
+            texts.attr("x", function(d){ return d.x; })
+                    .attr("y", function(d){ return d.y; });
+        }
+
+
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>折线图</title>
+    <style>
+        .axis path,.axis line{
+            fill:none;
+            stroke:black;
+            shape-rendering: crispEdges;
+        }
+        .MyText{
+            fill:black;
+            text-anchor: middle;
+        }
+    </style>
+    <script type="text/javascript" src="d3/d3.js"></script>
+</head>
+<body>
+    <script>
+        //创建画布
+        var width = 600;
+        var height = 300;
+        var svg = d3.select("body")
+                .append("svg")
+                .attr("width",width)
+                .attr("height",height)
+
+        var padding = {top:50,right:50,bottom:50,left:50};  //svg画布边缘与图表内容的距离
+
+//        //创建一个分组用来组合要画的图表元素
+//        var main = svg.append("g")
+//                .attr("transform","translate(" + padding.top + "," + padding.left + ")");
+
+        // 模拟数据
+        var dataset = [
+            {x: 0, y: 11}, {x: 1, y: 35},
+            {x: 2, y: 23}, {x: 3, y: 78},
+            {x: 4, y: 55}, {x: 5, y: 18},
+            {x: 6, y: 98}, {x: 7, y: 100},
+            {x: 8, y: 22}, {x: 9, y: 65}
+        ];
+
+        //创建比例尺
+        var xScale = d3.scaleLinear()
+                .domain(d3.extent(dataset,function(d){     //d3.extent可以得到参数数组中的最大值和最小值，并以数组的形式返回。
+                    return d.x;
+                }))
+                .range([0,width-padding.left-padding.right])
+
+        var yScale = d3.scaleLinear()
+                .domain(d3.extent(dataset,function(d){
+                    return d.y;
+                }))
+                .range([height-padding.top-padding.bottom,0])   //因为SVG画布的y轴与传统认知上的y轴的方向是反着来的，所以在定义y轴的定义域和值域对应关系时，也需要反着来
+
+        //创建坐标轴
+        var xAixs = d3.axisBottom()
+                .scale(xScale)
+
+        var yAxis = d3.axisLeft()
+                .scale(yScale)
+
+        //添加坐标轴元素
+        svg.append("g")
+                .attr("class","axis")
+                .attr("transform","translate("+padding.left+","+(height-padding.bottom)+")")
+                .call(xAixs)    //用call()把定义好的坐标轴与SVG元素联系起来。
+
+        svg.append("g")
+                .attr("class","axis")
+                .attr("transform","translate("+padding.left+","+padding.top+")")
+                .call(yAxis)
+
+
+        //创建一个直线生成器
+        var line = d3.line()
+                .x(function(d){return xScale(d.x);})
+                .y(function(d){return yScale(d.y);})
+                //.interpolate("linear");   // 选择线条的类型
+
+
+        //添加path元素，并通过line()计算出值来赋值
+        var path = svg.append("path")
+                .attr("class","line")
+                .attr("d",line(dataset))
+                .attr("transform","translate("+padding.left+","+padding.top+")")
+                .attr("fill","none")
+                .attr("stroke","steelblue")
+                .attr("stroke-width","2")
+
+        //颜色比例尺
+        var getColor = d3.scaleOrdinal()
+                .domain(d3.range(0, dataset.length))
+                .range(d3.schemeCategory10);
+        //点的实现
+        svg.selectAll("circle")
+                .data(dataset)
+                .enter()
+                .append("circle")
+                .attr("cx",function(d){
+                    return xScale(d.x);
+                })
+                .attr("cy",function(d){
+                    return yScale(d.y);
+                })
+                .attr("r",5)
+                .attr("fill",function(d,i){
+                    return getColor(i);
+                })
+                .attr("transform","translate("+padding.left+","+padding.top+")")
+
+        //添加文字
+        svg.selectAll(".MyText")
+                .data(dataset)
+                .enter()
+                .append("text")
+                .attr("transform","translate(" + padding.left + "," + padding.top + ")")
+                .attr("x",function(d){
+                    return xScale(d.x);
+                })
+                .attr("y",function(d){
+                    return yScale(d.y);
+                })
+                .text(function(d){
+                   return d.x;
+               })
+
+    </script>
+</body>
+</html>

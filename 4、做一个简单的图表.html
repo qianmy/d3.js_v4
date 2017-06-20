@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>做一个简单的图表</title>
+    <script type="text/javascript" src="d3/d3.js"></script>
+</head>
+<body>
+
+<script>
+//添加画布
+    var width = 300;    //设置画布宽度
+    var height = 300;   //设置画布高度
+    var svg = d3.select("body") //创建画布
+            .append("svg")
+            .attr("width",width)
+            .attr("height",height);
+//    绘制矩形
+//x - 矩形左上角的 x 坐标
+//y - 矩形左上角的 y 坐标
+//width - 矩形的宽度
+//height - 矩形的高度
+
+    var dataset  = [250,210,170,130,90];   //  数据（表示矩形的宽度）
+
+    var rectheight = 25;    //每个矩形所占的像素高度（包括空白）
+
+    svg.selectAll("rect")
+            .data(dataset)
+            .enter()
+            .append("rect")
+            .attr("x",20)
+            .attr("y",function(d,i){
+                return i * rectheight;
+            })
+            .attr("width",function(d){
+                return d;
+            })
+            .attr("height",rectheight-2)
+            .attr("fill","steelblue");
+
+
+//第二个简单图表
+    var width2 = 400;
+    var height2 = 400;
+    var svg2 = d3.select("body")
+            .append("svg")
+            .attr("width",width2)
+            .attr("height",height2);
+
+    var rectWidth2 = 25;
+
+    var dataset2 = [100,120,80,380,220,150];
+
+    svg2.selectAll("rect")
+            .data(dataset2)
+            .enter()
+            .append("rect")
+            .attr("x",function(d,i){
+                d = rectWidth2;
+                return i * d;
+            })
+            .attr("y",100)
+            .attr("width",rectWidth2-2)
+            .attr("height",function(d){
+                return d;
+            })
+            .attr("fill","lightblue");
+
+</script>
+</body>
+</html>

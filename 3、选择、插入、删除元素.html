@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>选择、插入、删除元素</title>
+    <script type="text/javascript" src="d3/d3.js"></script>
+</head>
+<body>
+    <p>Hello World1</p>
+    <p id="n2">Hello World2</p>
+    <p>Hello World3</p>
+<script >
+//    选择第一个p
+    var p1 = d3.select("p")
+            .style("color","red");
+
+//    在为n2的元素前添加一个p元素
+    d3.select("body").insert("p","#n2").text("我是添加在n2前的p");
+
+//    在body末尾添加一个p元素
+    d3.select("body").append("p")
+        .text("append p element");
+
+var p = d3.select("body").select("#n2");
+p.remove();
+</script>
+</body>
+</html>
